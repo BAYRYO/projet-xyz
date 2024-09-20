@@ -23,8 +23,11 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $name = fake()->name();
+        $avatar = 'https://avatar.iran.liara.run/public/'.(fake()->boolean() ? 'girl' : 'boy').'?name='.$name;
         return [
-            'name' => fake()->name(),
+            'name' => $name,
+            'avatar' => $avatar,
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
