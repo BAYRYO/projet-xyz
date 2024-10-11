@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Services\CodeService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'avatar',
     ];
 
     /**
@@ -33,6 +34,24 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    protected static function booted(): void
+    {
+        static::created(function (User $user) {
+            $user->generateCodes();
+        });
+    }
+
+    public function generateCodes(): User
+    {
+        $codes = app(CodeService::class)->generate();
+
+        $this->codes()->createMany(array_map(fn($code) => [
+            'code' => $code,
+        ], $codes));
+
+        return $this;
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -50,8 +69,8 @@ class User extends Authenticatable
     protected function username(): Attribute
     {
         return Attribute::make(
-            get: fn() => 'user'.str_pad($this->id,4,"0",STR_PAD_LEFT),
-    );
+            get: fn() => 'user'.str_pad((string) $this->id, 4, "0", STR_PAD_LEFT),
+        );
     }
 
     public function codes(): HasMany

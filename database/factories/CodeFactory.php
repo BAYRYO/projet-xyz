@@ -3,8 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Services\CodeService;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Code>
@@ -19,7 +19,7 @@ class CodeFactory extends Factory
     public function definition(): array
     {
         return [
-            'code' => Str::upper(fake()->bothify('????-####-????')),
+            'code' => CodeService::generate(),
             'host_id' => User::factory(),
             'guest_id' => null,
             'consumed_at' => null,

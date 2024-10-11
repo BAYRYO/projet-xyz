@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Services\CodeService;
+use Database\Factories\CodeFactory;
 use Database\Factories\UserFactory;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -13,6 +14,17 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        UserFactory::new()->count(100)->create();
+        $users = UserFactory::new()->count(100)->create();
+
+        foreach ($users as $user) {
+            $codes = CodeService::generate();
+            foreach ($codes as $code) {
+                CodeFactory::new()->create([
+                    'host_id' => $user->id,
+                    'guest_id' => null,
+                    'code' => $code,
+                ]);
+            }
+        }
     }
 }

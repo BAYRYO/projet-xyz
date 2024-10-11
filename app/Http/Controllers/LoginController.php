@@ -9,14 +9,16 @@ use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
-    /*
-     * Handle an authentication attempt.
-     */
+    public function login()
+    {
+        return view('auth.login');
+    }
+
     public function authenticate(Request $request): RedirectResponse
     {
         $validator = Validator::make($request->all(), [
-            'email' => 'required|string|email|max:255',
-            'password' => 'required|string|min:6'
+            'email' => ['required', 'email'],
+            'password' => ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -25,6 +27,7 @@ class LoginController extends Controller
                 ->withErrors($validator)
                 ->withInput();
         }
+
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
@@ -33,19 +36,22 @@ class LoginController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            return redirect()->intended();
+            return redirect()->route('home');
         }
 
         return back()->withErrors([
-            'email' => 'Le mot de passe et/ou l\'email saisis sont incorrectes.',
+            'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
     }
 
     public function logout(Request $request): RedirectResponse
     {
         Auth::logout();
+
         $request->session()->invalidate();
+
         $request->session()->regenerateToken();
-        return redirect('/login');
+
+        return redirect('/');
     }
 }
